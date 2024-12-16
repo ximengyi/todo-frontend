@@ -1,133 +1,110 @@
-<script setup>
-import { ref } from 'vue'
-
-const value = ref('')
-const list = ref([
-  { value: '吃饭', isCompleted: true },
-  { value: '睡觉', isCompleted: false },
-  { value: '打豆豆', isCompleted: false },
-])
-
-function add() {
-  list.value.push({
-    value: value.value,
-    isCompleted: false,
-  })
-
-  value.value = ''
-}
-
-function del(index) {
-  list.value.splice(index, 1)
-}
-</script>
 <template>
-  <div class="todo-app">
-    <div class="title">Todo App</div>
-
-    <div class="todo-form">
+  <div class="container">
+    <h1>Todo List</h1>
+    
+    <div class="add-todo">
       <input
-        v-model="value"
-        type="text"
-        class="todo-input"
-        placeholder="Add a todo"
-      />
-      <div @click="add" class="todo-button">Add Todo</div>
+        v-model="newTodo"
+        @keyup.enter="addTodo"
+        placeholder="添加新的待办事项..."
+      >
+      <base-button @click="addTodo">添加</base-button>
     </div>
 
-    <div
-      v-for="(item, index) in list"
-      :class="[item.isCompleted ? 'completed' : 'item']"
-    >
-      <div>
-        <input v-model="item.isCompleted" type="checkbox" />
-        <span class="name">{{ item.value }}</span>
-      </div>
+    <Calendar :todos="todos" />
 
-      <div @click="del(index)" class="del">del</div>
+    <div class="todo-list">
+      <TodoItem
+        v-for="todo in todos"
+        :key="todo.id"
+        :todo="todo"
+        @toggle="toggleTodo"
+        @delete="deleteTodo"
+      />
     </div>
   </div>
 </template>
 
+<script setup>
+import { ref, onMounted } from 'vue'
+import { todoApi } from './services/api'
+import Calendar from './components/Calendar.vue'
+import TodoItem from './components/TodoItem.vue'
+import BaseButton from './components/BaseButton.vue'
+
+const todos = ref([])
+const newTodo = ref('')
+
+onMounted(async () => {
+  try {
+    const response = await todoApi.getAll()
+    todos.value = response.data
+  } catch (error) {
+    console.error('Failed to fetch todos:', error)
+  }
+})
+
+const addTodo = async () => {
+  if (!newTodo.value.trim()) return
+  
+  try {
+    const response = await todoApi.create({
+      text: newTodo.value,
+      completed: false,
+      date: new Date().toISOString()
+    })
+    todos.value.push(response.data)
+    newTodo.value = ''
+  } catch (error) {
+    console.error('Failed to add todo:', error)
+  }
+}
+
+const toggleTodo = async (id) => {
+  try {
+    await todoApi.toggleComplete(id)
+    const todo = todos.value.find(t => t.id === id)
+    if (todo) {
+      todo.completed = !todo.completed
+    }
+  } catch (error) {
+    console.error('Failed to toggle todo:', error)
+  }
+}
+
+const deleteTodo = async (id) => {
+  try {
+    await todoApi.delete(id)
+    todos.value = todos.value.filter(t => t.id !== id)
+  } catch (error) {
+    console.error('Failed to delete todo:', error)
+  }
+}
+</script>
+
 <style scoped>
-.todo-app {
-  box-sizing: border-box;
-  margin-top: 40px;
-  margin-left: 1%;
-  padding-top: 30px;
-  width: 98%;
-  height: 500px;
-  background: #ffffff;
-  border-radius: 5px;
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
 }
 
-.title {
-  text-align: center;
-  font-size: 30px;
-  font-weight: 700;
-}
-
-.todo-form {
+.add-todo {
   display: flex;
-  margin: 20px 0 30px 20px;
+  gap: 8px;
+  margin-bottom: 20px;
 }
 
-.todo-button {
-  width: 100px;
-  height: 52px;
-  border-radius: 0 20px 20px 0;
-
-  text-align: center;
-  background: linear-gradient(
-    to right,
-    rgb(113, 65, 168),
-    rgba(44, 114, 251, 1)
-  );
-  color: #fff;
-  line-height: 52px;
-  cursor: pointer;
-  font-size: 14px;
-  user-select: none;
+.add-todo input {
+  flex: 1;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
 }
 
-.todo-input {
-  padding: 0px 15px 0px 15px;
-  border-radius: 20px 0 0 20px;
-  border: 1px solid #dfe1e5;
-  outline: none;
-  width: 60%;
-  height: 50px;
-}
-
-.item {
-  box-sizing: border-box;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 80%;
-  height: 50px;
-  margin: 8px auto;
-  padding: 16px;
-  border-radius: 20px;
-  box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 20px;
-}
-
-.del {
-  color: red;
-}
-
-.completed {
-  box-sizing: border-box;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 80%;
-  height: 50px;
-  margin: 8px auto;
-  padding: 16px;
-  border-radius: 20px;
-  box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 20px;
-  text-decoration: line-through;
-  opacity: 0.4;
+.todo-list {
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  margin-top: 20px;
 }
 </style>
