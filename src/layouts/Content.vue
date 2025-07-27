@@ -150,15 +150,6 @@ onMounted(() => {
   background: #52c41a;
 }
 
-.vertical-divider {
-  width: 1px;
-  height: 90%;
-  background: #e0e0e0;
-  margin: 0 8px;
-  align-self: stretch;
-  border-radius: 1px;
-}
-
 .calendar-wrapper {
   width: 100%;
   max-width: 420px; /* 增大最大宽度 */

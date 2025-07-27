@@ -49,5 +49,6 @@ import Content from './Content.vue'
 
 .el-container {
   height: 100vh; /* 容器高度占满 */
+  border: none;
 }
 </style>
