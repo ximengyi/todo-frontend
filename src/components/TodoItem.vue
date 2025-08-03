@@ -1,24 +1,31 @@
 <template>
-  <div class="todo-item" :class="{ done: item.done }">
+  <div class="todo-item" :class="{ done: item.status }">
     <span class="drag-handle" title="拖动排序">☰</span>
-    <a-checkbox v-model:checked="item.done" @change="onToggle" />
-    <span class="todo-text" @click="onToggle">{{ item.text }}</span>
+    <a-checkbox v-model:checked="item.status" @change="onToggle" />
+    <span class="todo-text" @click="onToggle">{{ item.content }}</span>
     <a-button type="link" danger @click="onRemove">删除</a-button>
   </div>
 </template>
 
 <script setup lang="ts">
 import { defineProps, defineEmits } from 'vue'
+import { todoAPI } from '../api'
+import type { TodoItem } from '../api';
 const props = defineProps<{
-  item: { id: number; text: string; done: boolean }
+  item: TodoItem
 }>()
-const emit = defineEmits(['toggle', 'remove'])
+const emit = defineEmits(['toggle', 'remove','dateChange'])
+
+
 
 function onToggle() {
   emit('toggle', props.item.id)
 }
 function onRemove() {
   emit('remove', props.item.id)
+}
+function onDateChange() {
+  emit('dateChange', props.item.id)
 }
 </script>
 

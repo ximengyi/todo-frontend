@@ -34,19 +34,22 @@ import dayjs, { Dayjs } from 'dayjs'
 import draggable from 'vuedraggable'
 import CalendarElement from '../components/CalendarElement.vue'
 import TodoInput from '../components/TodoInput.vue'
-import TodoItem from '../components/TodoItem.vue'
-// import { ElDivider } from 'element-plus'
+// import TodoItem from '../components/TodoItem.vue'
+import type {TodoItem} from '../api/index'
+import { todoAPI, } from '../api'
 
+
+// Todo
 // Todo 类型
-interface TodoItemType {
-  id: number
-  text: string
-  done: boolean
-}
+// interface TodoItemType {
+//   id: number
+//   text: string
+//   done: boolean
+// }
 
 const selectedDate = ref<Dayjs>(dayjs())
 const newTodo = ref('')
-const todos = ref<TodoItemType[]>([])
+const todos = ref<TodoItem[]>([])
 
 // 日历状态，key为日期字符串，值为'finished'|'unfinished'
 const calendarStatus = ref<Record<string, 'finished' | 'unfinished'>>({})
@@ -54,8 +57,12 @@ const calendarStatus = ref<Record<string, 'finished' | 'unfinished'>>({})
 // 模拟后端接口
 function fetchTodos(date: Dayjs) {
   todos.value = [
-    { id: 1, text: '示例待办1', done: false },
-    { id: 2, text: '示例待办2', done: true },
+    // { id: 1, text: '示例待办1', done: false },
+    // { id: 2, text: '示例待办2', done: true },
+    // { id: 3, text: '示例待办3', done: true },
+    { id: 1,  content: '示例待办1', status: 0,sort:0,  createdAt: '', updatedAt: '' },
+    { id: 2,  content: '示例待办2', status: 0, sort:0, createdAt: '', updatedAt: '' },
+    { id: 3,  content: '示例待办3', status: 0,sort:0, createdAt: '', updatedAt: '' },
   ]
 }
 function fetchMonthStatus(date: Dayjs) {
@@ -70,14 +77,27 @@ function onSelectDate(date: Dayjs) {
   fetchTodos(date)
 }
 
-function addTodo(text: string) {
-  if (!text.trim()) return
-  todos.value.push({
-    id: Date.now(),
-    text,
-    done: false,
-  })
-  newTodo.value = ''
+async function addTodo(text: string) {
+  if (!text.trim()) return;
+  try {
+    const newTodoItem = await todoAPI.createTodo({
+      content: '',
+      sort: 0,
+      group_id: 0,
+    });
+    todos.value.push({
+      id: newTodoItem.data.id,
+      content: newTodoItem.data.content,
+      sort:newTodoItem.data.sort,
+      status: newTodoItem.data.status,
+      createdAt: '',
+      updatedAt: ''
+    });
+    newTodo.value = '';
+  } catch (error) {
+    console.error('添加待办失败:', error);
+  }
+
 }
 
 function removeTodo(id: number) {
@@ -86,7 +106,8 @@ function removeTodo(id: number) {
 
 function toggleTodo(id: number) {
   const todo = todos.value.find((item) => item.id === id)
-  if (todo) todo.done = !todo.done
+  if (todo) todo.status = todo.status === 0 ? 1 : 0
+
 }
 
 // 日历渲染红点/绿点

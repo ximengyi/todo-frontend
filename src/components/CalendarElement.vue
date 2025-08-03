@@ -13,7 +13,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import { reactive } from 'vue'
 
 const value = ref(new Date())
@@ -27,6 +27,9 @@ function getDotColor(day: string): '' | 'green' | 'red' {
   if (!event) return ''
   return event.status ? 'green' : 'red'
 }
+watch(value, (newValue) => {
+  console.log(newValue)
+})
 </script>
 
 <style scoped>
