@@ -19,8 +19,13 @@
           handle=".drag-handle"
           class="todo-list"
         >
+          // 修改组件导入为别名
+          import TodoItemComponent from '../components/TodoItem.vue'
+          import type {TodoItem} from '../api/index'
+          
+          // 在模板中使用新的组件名称
           <template #item="{ element }">
-            <TodoItem :item="element" @toggle="toggleTodo" @remove="removeTodo" />
+            <Todo :item="element" @toggle="toggleTodo" @remove="removeTodo" />
           </template>
         </draggable>
       </el-col>
@@ -34,7 +39,7 @@ import dayjs, { Dayjs } from 'dayjs'
 import draggable from 'vuedraggable'
 import CalendarElement from '../components/CalendarElement.vue'
 import TodoInput from '../components/TodoInput.vue'
-// import TodoItem from '../components/TodoItem.vue'
+import Todo from '../components/Todo.vue'
 import type {TodoItem} from '../api/index'
 import { todoAPI, } from '../api'
 
@@ -56,14 +61,13 @@ const calendarStatus = ref<Record<string, 'finished' | 'unfinished'>>({})
 
 // 模拟后端接口
 function fetchTodos(date: Dayjs) {
+  console.log('fetchTodos called with date:', date)
   todos.value = [
-    // { id: 1, text: '示例待办1', done: false },
-    // { id: 2, text: '示例待办2', done: true },
-    // { id: 3, text: '示例待办3', done: true },
-    { id: 1,  content: '示例待办1', status: 0,sort:0,  createdAt: '', updatedAt: '' },
-    { id: 2,  content: '示例待办2', status: 0, sort:0, createdAt: '', updatedAt: '' },
-    { id: 3,  content: '示例待办3', status: 0,sort:0, createdAt: '', updatedAt: '' },
+    { id: 1, content: '示例待办1', status: 0, sort: 0, createdAt: '', updatedAt: '' },
+    { id: 2, content: '示例待办2', status: 1, sort: 0, createdAt: '', updatedAt: '' },
+    { id: 3, content: '示例待办3', status: 0, sort: 0, createdAt: '', updatedAt: '' },
   ]
+  console.log('todos after fetch:', todos.value)
 }
 function fetchMonthStatus(date: Dayjs) {
   calendarStatus.value = {
@@ -81,7 +85,7 @@ async function addTodo(text: string) {
   if (!text.trim()) return;
   try {
     const newTodoItem = await todoAPI.createTodo({
-      content: '',
+      content: text,
       sort: 0,
       group_id: 0,
     });
