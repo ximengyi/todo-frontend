@@ -44,14 +44,6 @@ import type {TodoItem} from '../api/index'
 import { todoAPI, } from '../api'
 
 
-// Todo
-// Todo 类型
-// interface TodoItemType {
-//   id: number
-//   text: string
-//   done: boolean
-// }
-
 const selectedDate = ref<Dayjs>(dayjs())
 const newTodo = ref('')
 const todos = reactive<TodoItem[]>([])
@@ -108,6 +100,7 @@ async function addTodo(text: string) {
       content: text,
       sort: 0,
       group_id: 0,
+      status: 0,
     });
     console.log('new todo item ', newTodoItem)
     todos.push({
@@ -129,9 +122,28 @@ function removeTodo(id: number) {
   todos.splice(0, todos.length, ...todos.filter((item) => item.id !== id))
 }
 
-function toggleTodo(id: number) {
+async function toggleTodo(id: number) {
+  console.log('toggleTodo called with id:', id);
   const todo = todos.find((item) => item.id === id)
-  if (todo) todo.status = !todo.status
+  if (todo) {
+    const newStatus = !todo.status;
+    try {
+      // 调用后端接口更新状态
+      await todoAPI.updateTodo(id, {status: newStatus ? 1 : 0 }).then(() => {
+        // 更新本地状态
+        console.log('todo status updated to:', newStatus);
+
+        Object.assign(todo, {status: newStatus });
+        // todo.status = newStatus;
+      }).catch((error) => {
+        console.error('更新待办项状态失败:', error);
+      });
+      // 更新本地状态
+      // todo.status = newStatus;
+    } catch (error) {
+      console.error('更新待办项状态失败:', error);
+    }
+  }
 
 }
 

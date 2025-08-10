@@ -24,5 +24,7 @@ export interface Pagination<T> {
 export interface TodoParams {
   sort: number;
   content: string;
+  status: number;
   group_id?: number;
+  id?: number;
 }
