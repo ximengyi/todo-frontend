@@ -6,8 +6,8 @@ export interface TodoItem {
   content: string;
   sort: number;
   status: number;
-  createdAt: string;
-  updatedAt: string;
+  created_at: string;
+  updated_at: string;
 }
 
 /**

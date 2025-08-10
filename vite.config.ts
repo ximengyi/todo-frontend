@@ -9,13 +9,14 @@ export default defineConfig({
       '@': '/src',
     },
   },
-  // 添加服务器代理配置
+  //添加服务器代理配置
   server: {
     proxy: {
       '/api': {
-        target: 'http://basic.dev:8787', // 后端服务器地址
-        changeOrigin: true, // 允许跨域
-        rewrite: (path) => path.replace(/^\/api/, '') // 重写路径，移除/api前缀
+        target: 'http://basic.dev:8787',
+        changeOrigin: true,
+        // 尝试移除rewrite规则，有些后端API可能需要保留/api前缀
+        // rewrite: (path) => path.replace(/^\/api/, '')
       }
     }
   }

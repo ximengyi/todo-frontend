@@ -10,7 +10,7 @@ import { getToken, removeToken } from '../utils/auth';
 
 // 创建axios实例
 const service = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || '/api',
+  baseURL: '/api', // 直接设置为/api
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json;charset=utf-8'
@@ -35,11 +35,12 @@ service.interceptors.request.use(
 );
 
 // 响应拦截器
+// 响应拦截器
 service.interceptors.response.use(
   (response: AxiosResponse) => {
     const { data } = response;
     // 假设后端统一响应格式为 { code: number, data: any, message: string }
-    if (data.code !== 200) {
+    if (data.code !== 0) { // 改为0
       // 业务错误处理
       ElMessage.error(data.message || '操作失败');
       // 处理401未授权

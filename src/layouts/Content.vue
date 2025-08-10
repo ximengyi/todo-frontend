@@ -89,19 +89,20 @@ async function addTodo(text: string) {
       sort: 0,
       group_id: 0,
     });
+    console.log('new todo item ', newTodoItem)
     todos.value.push({
-      id: newTodoItem.data.id,
-      content: newTodoItem.data.content,
-      sort:newTodoItem.data.sort,
-      status: newTodoItem.data.status,
-      createdAt: '',
-      updatedAt: ''
+      id: newTodoItem.id,  // 直接访问id
+      content: newTodoItem.content,
+      sort: newTodoItem.sort,
+      status: newTodoItem.status,
+      created_at: newTodoItem.created_at,
+      updated_at: newTodoItem.updated_at,
     });
     newTodo.value = '';
+    // ElMessage.success('待办项添加成功'); // 可选：添加成功提示
   } catch (error) {
-    console.error('添加待办失败:', error);
+    console.error('添加待办失败:', error instanceof Error ? error.message : JSON.stringify(error));
   }
-
 }
 
 function removeTodo(id: number) {

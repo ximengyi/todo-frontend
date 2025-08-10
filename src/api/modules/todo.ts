@@ -22,8 +22,14 @@ export const getTodoById = (id: string | number) => {
  * 创建Todo
  * @param data Todo数据
  */
-export const createTodo = (data: TodoParams) => {
-  return http.post<TodoItem>('/todos', data);
+// 修改前
+// export const createTodo = (data: TodoParams) => {
+//   return http.post<TodoItem>('/todo', data);
+// };
+
+// 修改后
+export const createTodo = (data: TodoParams): Promise<any> => {
+  return http.post<any>('/todo', data);
 };
 
 /**
@@ -32,7 +38,7 @@ export const createTodo = (data: TodoParams) => {
  * @param data 更新数据
  */
 export const updateTodo = (id: string | number, data: Partial<TodoParams>) => {
-  return http.put<TodoItem>(`/todos/${id}`, data);
+  return http.put<TodoItem>(`/todo/${id}`, data);
 };
 
 /**
