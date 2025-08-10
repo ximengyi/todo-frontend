@@ -34,7 +34,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, h } from 'vue'
+import { ref, onMounted, h, reactive } from 'vue'
 import dayjs, { Dayjs } from 'dayjs'
 import draggable from 'vuedraggable'
 import CalendarElement from '../components/CalendarElement.vue'
@@ -54,20 +54,40 @@ import { todoAPI, } from '../api'
 
 const selectedDate = ref<Dayjs>(dayjs())
 const newTodo = ref('')
-const todos = ref<TodoItem[]>([])
+const todos = reactive<TodoItem[]>([])
 
 // 日历状态，key为日期字符串，值为'finished'|'unfinished'
 const calendarStatus = ref<Record<string, 'finished' | 'unfinished'>>({})
 
 // 模拟后端接口
-function fetchTodos(date: Dayjs) {
-  console.log('fetchTodos called with date:', date)
-  todos.value = [
-    { id: 1, content: '示例待办1', status: 0, sort: 0, createdAt: '', updatedAt: '' },
-    { id: 2, content: '示例待办2', status: 1, sort: 0, createdAt: '', updatedAt: '' },
-    { id: 3, content: '示例待办3', status: 0, sort: 0, createdAt: '', updatedAt: '' },
-  ]
-  console.log('todos after fetch:', todos.value)
+// 修改为异步方法
+async function fetchTodos(date: Dayjs) {
+  console.log('fetchTodos called with date:', date);
+  try {
+    // 调用API获取数据
+    const response = await todoAPI.getTodoList({
+      page: 1,
+      size: 15
+    });
+    
+    // 处理响应数据
+    // 清空数组并添加新数据
+     todos.length = 0;
+     todos.push(...response.list.map(item => ({
+       id: item.id,
+       content: item.content,
+       status: Boolean(item.status),
+       sort: item.sort,
+       created_at: item.created_at,
+       updated_at: item.updated_at
+     })));
+    
+    console.log('todos after fetch:', todos);
+  } catch (error) {
+    console.error('获取待办列表失败:', error);
+    // 错误处理，例如显示提示信息
+    // ElMessage.error('获取待办列表失败');
+  }
 }
 function fetchMonthStatus(date: Dayjs) {
   calendarStatus.value = {
@@ -90,7 +110,7 @@ async function addTodo(text: string) {
       group_id: 0,
     });
     console.log('new todo item ', newTodoItem)
-    todos.value.push({
+    todos.push({
       id: newTodoItem.id,  // 直接访问id
       content: newTodoItem.content,
       sort: newTodoItem.sort,
@@ -106,12 +126,12 @@ async function addTodo(text: string) {
 }
 
 function removeTodo(id: number) {
-  todos.value = todos.value.filter((item) => item.id !== id)
+  todos.splice(0, todos.length, ...todos.filter((item) => item.id !== id))
 }
 
 function toggleTodo(id: number) {
-  const todo = todos.value.find((item) => item.id === id)
-  if (todo) todo.status = todo.status === 0 ? 1 : 0
+  const todo = todos.find((item) => item.id === id)
+  if (todo) todo.status = !todo.status
 
 }
 

@@ -1,13 +1,18 @@
 import http from '../http';
 import type { TodoItem } from '../types/todoTypes';
 import type { TodoParams } from '../types/todoTypes';
+import type { Pagination } from '../types/todoTypes';
+// 首先在文件顶部导入新的响应类型
+import type { ApiResponse } from '../types/response';
 
+// 然后修改getTodoList方法
 /**
  * Todo列表接口
  * @param params 查询参数
  */
 export const getTodoList = (params?: { page?: number; size?: number }) => {
-  return http.get<TodoItem[]>('/todos', { params });
+  // 修改为正确的返回类型
+  return http.get<ApiResponse<Pagination<TodoItem>>>('/todos', { params }) as unknown as Promise<Pagination<TodoItem>>;
 };
 
 /**

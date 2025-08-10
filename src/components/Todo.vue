@@ -3,7 +3,7 @@
     <span class="drag-handle" title="拖动排序">☰</span>
     <el-checkbox v-model:checked="item.status" @change="onToggle" />
     <span class="todo-text" @click="onToggle">{{ item.content }}</span>
-    <el-button type="text" danger @click="onRemove">删除</el-button>
+    <el-button type="danger" @click="onRemove">删除</el-button>
   </div>
 </template>
 
