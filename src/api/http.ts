@@ -1,12 +1,8 @@
 import axios from 'axios';
 import type {InternalAxiosRequestConfig, AxiosResponse, AxiosError } from 'axios';
 import { ElMessage } from 'element-plus';
-// 由于找不到 '@/utils/auth' 模块，当前仅为占位导入，实际使用时需要创建该文件
-// 请在项目的 '@/utils/auth' 路径下创建 auth.ts 文件并实现 getToken 和 removeToken 函数
-// 由于找不到 '@/utils/auth' 模块，暂时使用空函数作为占位
 import { getToken, removeToken } from '../utils/auth';
-// const getToken = () => '';
-// const removeToken = () => {};
+import router from '../router';
 
 // 创建axios实例
 const service = axios.create({
@@ -39,14 +35,14 @@ service.interceptors.request.use(
 service.interceptors.response.use(
   (response: AxiosResponse) => {
     const { data } = response;
-    // 假设后端统一响应格式为 { code: number, data: any, message: string }
-    if (data.code !== 0) { // 改为0
+    // 假设后端统一响应格式为 { code: number, msg: string, data: any }
+    if (data.code !== 0) {
       // 业务错误处理
-      ElMessage.error(data.message || '操作失败');
+      ElMessage.error(data.msg || '操作失败');
       // 处理401未授权
       if (data.code === 401) {
         removeToken();
-        window.location.href = '/login';
+        router.push('/login');
       }
       return Promise.reject(data);
     }
@@ -56,6 +52,12 @@ service.interceptors.response.use(
     // 网络错误处理
     const status = error.response?.status;
     switch (status) {
+      case 401:
+        // HTTP 401未授权
+        removeToken();
+        router.push('/login');
+        ElMessage.error('登录已过期，请重新登录');
+        break;
       case 404:
         ElMessage.error('接口不存在');
         break;
